@@ -7,6 +7,7 @@ from discord.ext import commands
 from discord import app_commands
 from ._formatter import Format
 
+#pretty self explanatory with all the logging.
 
 class ContainerHandler(commands.Cog):
    
@@ -16,7 +17,7 @@ class ContainerHandler(commands.Cog):
         self.bot = bot
         self.logger = logging.getLogger(self.__class__.__name__)
         self.header = {
-            "Cache-Control": "no-cache",  # Fixed typo: 'no-chache'
+            "Cache-Control": "no-cache",  
             "Ocp-Apim-Subscription-Key": os.getenv("PORTKEY"),
         }
 
