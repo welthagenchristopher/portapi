@@ -14,14 +14,19 @@ class CogManager(commands.Cog):
         self.ext_dir = "cogs"
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    @discord.app_commands.command()
+    @discord.app_commands.command() #This command logic looks convoluted, 
+                                    #but handles either a reload of a single
+                                    #provided extension, otherwise will
+                                    #reload all of them.
     async def reload(
         self,
         interaction: discord.Interaction,
         extension: str = None,
     ):
       
-        await interaction.response.defer()
+        await interaction.response.defer() #Response deferring used to avoid timeout during 
+                                           #communication with Discord API.
+        
         self.logger.info(f"Reload command triggered with extension: {extension}")
 
         if not os.path.isdir(self.ext_dir):
@@ -31,7 +36,10 @@ class CogManager(commands.Cog):
 
         if extension and extension != "cogmgr":
             try:
-                await self.bot.unload_extension(f"{self.ext_dir}.{extension}")
+                await self.bot.unload_extension(f"{self.ext_dir}.{extension}") #Using .reload_extension works too,
+                                                                               #however bugs have been present within
+                                                                               #the method before, so sticking to a manual 
+                                                                               #process is safer for now.
                 self.logger.info(f"Unloaded extension {extension}")
                 await self.bot.load_extension(f"{self.ext_dir}.{extension}")
                 self.logger.info(f"Loaded extension {extension}")
@@ -75,7 +83,9 @@ class CogManager(commands.Cog):
         )
         await interaction.followup.send(reload_message)
 
-    @discord.app_commands.command()
+    @discord.app_commands.command() #Resync command primarily used for dev purposes to reload 
+                                    #command tree upon addition of new commands / logic.
+    
     async def resync(self, interaction: discord.Interaction):
      
         await interaction.response.defer()
