@@ -8,6 +8,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from ._formatter import Format
 
+#pretty self explanatory with all the logging.
 
 class VesselHandler(commands.Cog):
     
