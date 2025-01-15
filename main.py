@@ -39,7 +39,8 @@ class Portbot(commands.Bot):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.ext_dir = ext_dir
 
-    async def setup_hook(self) -> None:
+    async def setup_hook(self) -> None: #Alternative to on_ready that runs once prior to startup,
+                                        #Significantly better use of resources when using cogs, config files, etc.
         
         self.client = aiohttp.ClientSession()
         await self._load_extensions()
@@ -51,17 +52,22 @@ class Portbot(commands.Bot):
         if not self.synced:
             try:
                 self.logger.info("Syncing commands with Discord...")
-                await self.tree.sync()
+                await self.tree.sync() #Syncs command tree (slash commands).
                 self.logger.info("Successfully synced commands.")
                 self.synced = True
 
                 for command in self.tree._global_commands:
-                    if isinstance(command, discord.app_commands.Command):
+                    if isinstance(command, discord.app_commands.Command): #Technically not correct syntax if you're
+                                                                          #after the command names, but in this case 
+                                                                          #was used to confirm the presence of commands
+                                                                          #within the tree.
                         self.logger.info(f"Synced command: {command.name}")
                     else:
                         self.logger.error("Unexpected command type")
             except discord.errors.HTTPException as e:
-                self.logger.error(f"Error during command sync: {e}")
+                self.logger.error(f"Error during command sync: {e}") #Crucial piece of debugging here, failed communication
+                                                                     #with discord API throws this error - used to catch 
+                                                                     #errors with command syncing, auth, rate-limiting, etc.
                 if e.status == 429:
                     retry_after = int(
                         e.response.headers.get("Retry-After", 1)
