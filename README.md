@@ -1,11 +1,24 @@
 # portapi
 a wrapper for the Port Connect API, built into a discord bot
 
-Early stages with limited functionality, but it works, and is currently running off a docker container,
-of which I've not included any config or environment files for.
+Early stages with limited functionality.
 
-It is 100% compatible with the aiohttp library, however due to the fact it'll primarily be receiving 
-usage from two people, in one discord server, it's really not necessary.
+Everything you'd need to get a bot up and running, and then begin adding your own commands in is here.
 
-Not intended for adoption, updates, or public use. Just look at it.
+Below are some of the points I'll address when I return to the project:
+
+1. An alternative to the sh*t-show that is _formatter.py would be using BaseModel from pydantic - but with the low
+   performance needs, and it being my first time dealing with large JSON responses, I needed the visibility.
+
+2. Error and exception handling -100% can be simplified and handled within its own class, as is the case when 99% of
+   the errors are going to involve HTTP requests.
+
+3. the logic in cogmgr.py - don't know why I specifically excluded that file in extension handling, and it pains me that I
+   didn't follow the leading with a _ convention, but it'll be fixed.
+
+4. I've got auth headers declared all over the place, this should really have been seperated and handled in its own file / class.
+
+   
+
+
 
