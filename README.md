@@ -8,7 +8,7 @@ Everything you'd need to get a bot up and running, and then begin adding your ow
 Below are some of the points I'll address when I return to the project:
 
 1. An alternative to the sh*t-show that is _formatter.py would be using BaseModel from pydantic - but with the low
-   performance needs, and it being my first time dealing with large JSON responses, I needed the visibility.
+   performance needs, and it being my first time dealing with large JSON responses, I needed the visibility of the json dicts.
 
 2. Error and exception handling -100% can be simplified and handled within its own class, as is the case when 99% of
    the errors are going to involve HTTP requests.
