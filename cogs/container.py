@@ -4,10 +4,8 @@ import requests
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
-from discord import app_commands
 from ._formatter import Format
 
-#pretty self explanatory with all the logging.
 
 class ContainerHandler(commands.Cog):
    
@@ -19,7 +17,7 @@ class ContainerHandler(commands.Cog):
         self.header = {
             "Cache-Control": "no-cache",  
             "Ocp-Apim-Subscription-Key": os.getenv("PORTKEY"),
-        }
+        } # Headers related specifically to communicating with the PortConnect API
 
     def container_request(self, container: str):
         
@@ -49,7 +47,10 @@ class ContainerHandler(commands.Cog):
             return None, 500
 
     @discord.app_commands.command()
-    async def container(self, interaction: discord.Interaction, container: str):
+    async def container(self, interaction: discord.Interaction, container: str): # The app commands that I explained my brief struggle with in #main.py
+                                                                                 # Notice the 'defer()' method. Using this essentially results in an HTTP
+                                                                                 # response of 'noted, waiting out for the resulting data', and prevents
+                                                                                 # the server from slapping you with a timeout error.
         
         await interaction.response.defer()
 
@@ -77,7 +78,7 @@ class ContainerHandler(commands.Cog):
         for key, value in content.items():
             embed.add_field(name=key, value=value, inline=False)
 
-        await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=embed) # The follow-up to defer() - allows for the close-down of the communication path.
 
 
 async def setup(bot: commands.Bot):
