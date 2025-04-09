@@ -4,7 +4,6 @@ import logging
 import traceback
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
 
 
 class CogManager(commands.Cog):
@@ -14,19 +13,17 @@ class CogManager(commands.Cog):
         self.ext_dir = "cogs"
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    @discord.app_commands.command() #This command logic looks convoluted, 
-                                    #but handles either a reload of a single
-                                    #provided extension, otherwise will
-                                    #reload all of them.
+    @discord.app_commands.command() 
     async def reload(
         self,
         interaction: discord.Interaction,
         extension: str = None,
-    ):
+    ):  # The app commands that I explained my brief struggle with in #main.py,
+        # Notice the 'defer()' method. Using this essentially results in an HTTP,
+        # response of 'noted, waiting out for the resulting data', and prevents,
+        # the server from slapping you with a timeout error.
       
-        await interaction.response.defer() #Response deferring used to avoid timeout during 
-                                           #communication with Discord API.
-        
+        await interaction.response.defer()
         self.logger.info(f"Reload command triggered with extension: {extension}")
 
         if not os.path.isdir(self.ext_dir):
@@ -34,15 +31,18 @@ class CogManager(commands.Cog):
             await interaction.followup.send("Extension directory not found.")
             return
 
-        if extension and extension != "cogmgr":
+        if extension and extension[0] != "_":
             try:
-                await self.bot.unload_extension(f"{self.ext_dir}.{extension}") #Using .reload_extension works too,
-                                                                               #however bugs have been present within
-                                                                               #the method before, so sticking to a manual 
-                                                                               #process is safer for now.
+                await self.bot.unload_extension(f"{self.ext_dir}.{extension}")
                 self.logger.info(f"Unloaded extension {extension}")
                 await self.bot.load_extension(f"{self.ext_dir}.{extension}")
-                self.logger.info(f"Loaded extension {extension}")
+                self.logger.info(f"Loaded extension {extension}") # The reasion for this very convoluted and manual use of unload, and reload here,
+                                                                  # is because at the time, I was experiencing an issue where reloading ,
+                                                                  # the modules would work, but the update would not be applied to their functionality.
+
+                                                                  # I finally got it working after realising application commands had to be reloaded,
+                                                                  # AND re-synced. Hence the resync() command. The only reason this process worked is
+                                                                  # because calling the load() method also syncs the commands - whereas reload() does not.
             except commands.ExtensionError:
                 self.logger.error(
                     f"Failed to reload extension {extension}\n"
@@ -56,7 +56,6 @@ class CogManager(commands.Cog):
                 if (
                     filename.endswith(".py")
                     and not filename.startswith("_")
-                    and filename != "cogmgr.py"
                 ):
                     try:
                         await self.bot.unload_extension(
@@ -83,10 +82,11 @@ class CogManager(commands.Cog):
         )
         await interaction.followup.send(reload_message)
 
-    @discord.app_commands.command() #Resync command primarily used for dev purposes to reload 
-                                    #command tree upon addition of new commands / logic.
-    
-    async def resync(self, interaction: discord.Interaction):
+    @discord.app_commands.command()
+    async def resync(self, interaction: discord.Interaction): # The app commands that I explained my brief struggle with in #main.py,
+                                                              # Notice the 'defer()' method. Using this essentially results in an HTTP,
+                                                              # response of 'noted, waiting out for the resulting data', and prevents,
+                                                              # the server from slapping you with a timeout error.
      
         await interaction.response.defer()
         self.logger.info("Syncing commands with Discord...")
