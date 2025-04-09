@@ -1,5 +1,4 @@
 import os
-import time
 import logging
 import requests
 import discord
@@ -8,7 +7,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from ._formatter import Format
 
-#pretty self explanatory with all the logging.
 
 class VesselHandler(commands.Cog):
     
@@ -20,8 +18,9 @@ class VesselHandler(commands.Cog):
         self.header = {
             "Cache-Control": "no-cache",
             "Ocp-Apim-Subscription-Key": os.getenv("PORTKEY"),
-        }
-        self.message_cache = {}
+        } # Headers related specifically to communicating with the PortConnect API
+
+        self.message_cache = {} # This cog requires a 'cache' because it returns multiple objects per call.
 
     async def embed_handler(
         self, interaction: discord.Interaction, content: list, page: int
@@ -40,7 +39,11 @@ class VesselHandler(commands.Cog):
         await message.add_reaction("\u27a1\ufe0f")  # Right arrow emoji
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User):
+    async def on_reaction_add(self, reaction: discord.Reaction, user: discord.User): # This is the reaction listener method. It can only be used on two conditions:
+                                                                                     # 1) the bot has the 'read messages' intent enabled, 2) the message in question
+                                                                                     # is present within the servers internal cache. For older messages, or possible
+                                                                                     # incompatibilities - use on_raw_reaction_add, though nine times out of ten this
+                                                                                     # works completely fine. 
        
         if user == self.bot.user:
             return
@@ -78,7 +81,7 @@ class VesselHandler(commands.Cog):
             f"?vesselType=COMMERCIAL"
             f"&arrivalDateFrom={date_past}"
             f"&arrivalDateTo={date_future}"
-        )
+        ) 
 
         try:
             response = requests.get(url, headers=self.header)
@@ -113,7 +116,10 @@ class VesselHandler(commands.Cog):
             return None
 
     @discord.app_commands.command()
-    async def vessel(self, interaction: discord.Interaction, *, args: str):
+    async def vessel(self, interaction: discord.Interaction, *, args: str): # The app commands that I explained my brief struggle with in #main.py,
+                                                                            # Notice the 'defer()' method. Using this essentially results in an HTTP,
+                                                                            # response of 'noted, waiting out for the resulting data', and prevents,
+                                                                            # the server from slapping you with a timeout error.
         
         await interaction.response.defer()
         vessel_name = args.strip().upper()
@@ -124,7 +130,12 @@ class VesselHandler(commands.Cog):
         self.logger.info(f"Vessel '{vessel_name}' requested")
         content = self.vessel_request(vessel_name)
 
-        if not content:
+        if not content: # Now, the caveat here is that I've used defer(), and (according to the docs) need to complete the interaction with a followup().
+                        # However, you cannot have multiple followup responses to a single instance of defer. I'm not 100% sure on this,
+                        # but my hypothesis is that even though when the code runs with no exceptions here, and DOESN'T send a followup(),
+                        # it still calls the embed manager - which is technically still a response. Thus I believe that as long as you include,
+                        # some kind of response, (not necessarily followup()) defer can be used religiously.
+
             await interaction.followup.send(
                 "The vessel was not found in the Port Connect database. "
                 "Please check for typos."
