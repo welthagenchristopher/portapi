@@ -3,7 +3,9 @@ class Format:
     def __init__(self):
         self.nodata = 'No data'
 
-    def _generate_dict(self, mapping, vessel):
+    def _generate_dict(self, mapping, vessel): # Nothing too special here - iterative dictionary generation for formatting,
+                                               # the json responses from the API. Honestly, If I had to do this I'd use,
+                                               # the basemodel library.
         
         return {key: vessel.get(value, self.nodata) if isinstance(value, str) else value(vessel) for key, value in mapping.items()}
 
