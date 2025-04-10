@@ -26,7 +26,7 @@ Now, regarding some of the hard-learned lessons I encountered.
             Remember that application commands are registered against the bot - not against particular servers, or shards, or instances.
    
          i.b Something to note with using defer(): this invoke requires a followup() response, after the data has been recieved. However, only one
-             followup() may be used in response to a defer() call. Syntaxially, you cannot have more than one present. What they don't tell you, is that
+             followup() may be used in response to a defer() call. Syntactically, you cannot have more than one present. What they don't tell you, is that
              any communication with the API behaves the same as followup() - so while you need one of these, you can then handle any other exception
              respones, or function calls, etc with generic discord.py methods.
    
@@ -46,7 +46,7 @@ Now, regarding some of the hard-learned lessons I encountered.
 
 Finally, make sure to check out https://discordpy.readthedocs.io/en/stable/index.html - there is a tonne of information, and functionality I didn't even touch on 
 with this project. If you want to use the project to get a basic understanding of bot creation, I'd highly recommend educating yourself on sharding, sessions, and
-the async functionality. These are all pre-requisites to creating multy-server bots.
+the async functionality. These are all pre-requisites to creating multi-server bots.
 
 
 
