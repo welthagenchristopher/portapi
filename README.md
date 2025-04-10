@@ -1,24 +1,52 @@
 # portapi
 a wrapper for the Port Connect API, built into a discord bot
 
-Early stages with limited functionality.
+This project is complete - in a sense. It handles a few different calls to the PortConnect API - and is set up for additional modules to be added
+with no change to the main classes. However, this was written a while ago - and while I certainly could do a better job now, were I to re-write this
+from the ground up, I still learnt a lot, and encountered a few edge-cases and trip-ups that I thought I'd point out here, for the benefit of others.
 
-Everything you'd need to get a bot up and running, and then begin adding your own commands in is here.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Below are some of the points I'll address when I return to the project:
+**To get the basic stuff out of the way first - this is a very dependency-light bot. It utilises the Discord.py, and Requests libraries. dotenv can be forgotten post development - its much easier, and safer to use docker secrets, or google run's environment secrets.
 
-1. An alternative to the sh*t-show that is _formatter.py would be using BaseModel from pydantic - but with the low
-   performance needs, and it being my first time dealing with large JSON responses, I needed the visibility of the json dicts.
+Everything is self contained - there is no external config drawn from anywhere, though obviously you cannot use this without authenticating with the 
+PortConnect API - which is a paid service. Nonetheless; plug in any exposed api routes and you're good to go.**
 
-2. Error and exception handling -100% can be simplified and handled within its own class, as is the case when 99% of
-   the errors are going to involve HTTP requests.
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-3. the logic in cogmgr.py - don't know why I specifically excluded that file in extension handling, and it pains me that I
-   didn't follow the leading with a _ convention, but it'll be fixed.
+Now, regarding some of the hard-learned lessons I encountered.
 
-4. I've got auth headers declared all over the place, this should really have been seperated and handled in its own file / class.
-
+1) Using the discord API is made extremely easy by use of the libraries developed by people much smarter than I am. However, knowing how to structure the
+   interactions between your bot, your server, and the API will go a long way in helping you avoid seemingly out-of-place errors.
    
+      a. Personally, I encountered major issues with the _Application command tree_, namely in performing simple actions like syncing, and registering.
+         Some things to note, when using these:
+   
+         i. Registration and syncing of these commands has to be deferred, which becomes especially true the more servers your bot is present in.
+            Remember that application commands are registered against the bot - not against particular servers, or shards, or instances.
+   
+         i.b Something to note with using defer(): this invoke requires a followup() response, after the data has been recieved. However, only one
+             followup() may be used in response to a defer() call. Syntaxially, you cannot have more than one present. What they don't tell you, is that
+             any communication with the API behaves the same as followup() - so while you need one of these, you can then handle any other exception
+             respones, or function calls, etc with generic discord.py methods.
+   
+         ii. Reload functionality for external modules is all well and good when it comes to generic bot commands (commands invoked with the defined
+             prefix). However, application commands need to be reloaded, AND re-synced. this can be handled with dedicated reload, and resync commands, or
+             alternatively, just calling 'load_extension()' - because this method is designed as an off-brand registration for commands, and also syncs the
+             commands present in the extension.
+   
+      b. Timemout exceptions are normally quite easily identified with API responses - however, a significant portion of Discord.Py's functionality is
+         designed to fail silently in regards to contextually insignificant request errors. Make use of _discord.errors.HTTPException_ to catch these,
+         where you can then read the _Retry-After_ value in the header to properly configure your retry functionality.
+
+      c. Final point in regards to this project - the steps of initialising, registering, and syncing is important, and can have severe impacts against the
+         performance and overheard of your bot. Make sure you use methods like setup_hook, on_ready, or on_connect properly.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Finally, make sure to check out https://discordpy.readthedocs.io/en/stable/index.html - there is a tonne of information, and functionality I didn't even touch on 
+with this project. If you want to use the project to get a basic understanding of bot creation, I'd highly recommend educating yourself on sharding, sessions, and
+the async functionality. These are all pre-requisites to creating multy-server bots.
 
 
 
