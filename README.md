@@ -16,31 +16,33 @@ PortConnect API - which is a paid service. Nonetheless; plug in any exposed api 
 
 Now, regarding some of the hard-learned lessons I encountered.
 
-1) Using the discord API is made extremely easy by use of the libraries developed by people much smarter than I am. However, knowing how to structure the
+   Using the discord API is made extremely easy by use of the libraries developed by people much smarter than I am. However, knowing how to structure the
    interactions between your bot, your server, and the API will go a long way in helping you avoid seemingly out-of-place errors.
    
-      a. Personally, I encountered major issues with the _Application command tree_, namely in performing simple actions like syncing, and registering.
-         Some things to note, when using these:
-   
-         i. Registration and syncing of these commands has to be deferred, which becomes especially true the more servers your bot is present in.
-            Remember that application commands are registered against the bot - not against particular servers, or shards, or instances.
-   
-         i.b Something to note with using defer(): this invoke requires a followup() response, after the data has been recieved. However, only one
-             followup() may be used in response to a defer() call. Syntactically, you cannot have more than one present. What they don't tell you, is that
-             any communication with the API behaves the same as followup() - so while you need one of these, you can then handle any other exception
-             respones, or function calls, etc with generic discord.py methods.
-   
-         ii. Reload functionality for external modules is all well and good when it comes to generic bot commands (commands invoked with the defined
-             prefix). However, application commands need to be reloaded, AND re-synced. this can be handled with dedicated reload, and resync commands, or
-             alternatively, just calling 'load_extension()' - because this method is designed as an off-brand registration for commands, and also syncs the
-             commands present in the extension.
-   
-      b. Timemout exceptions are normally quite easily identified with API responses - however, a significant portion of Discord.Py's functionality is
-         designed to fail silently in regards to contextually insignificant request errors. Make use of _discord.errors.HTTPException_ to catch these,
-         where you can then read the _Retry-After_ value in the header to properly configure your retry functionality.
+   Personally, I encountered major issues with the _Application command tree_, namely in performing simple actions like syncing, and registering.
+   Some things to note, when using these:
 
-      c. Final point in regards to this project - the steps of initialising, registering, and syncing is important, and can have severe impacts against the
-         performance and overheard of your bot. Make sure you use methods like setup_hook, on_ready, or on_connect properly.
+   
+   Registration and syncing of these commands has to be deferred, which becomes especially true the more servers your bot is present in.
+   Remember that application commands are registered against the bot - not against particular servers, or shards, or instances.
+   
+   Something to note with using defer(): this invoke requires a followup() response, after the data has been recieved. However, only one
+   followup() may be used in response to a defer() call. Syntactically, you cannot have more than one present. What isn't mentioned, is that
+   any communication with the API behaves the same as followup() - so while you need one of these, you can then handle any other exception
+   respones, or function calls, etc with generic discord.py calls.
+   
+   Reload functionality for external modules is all well and good when it comes to generic bot commands (commands invoked with the defined
+   prefix). However, application commands need to be reloaded, AND re-synced. this can be handled with dedicated reload, and resync commands, or
+   alternatively, just calling 'load_extension()' - because this method is designed as an off-brand registration for commands, that also syncs the
+   commands present in the extension.
+   
+   Timemout exceptions are normally quite easily identified with API responses - however, a significant portion of Discord.Py's functionality is
+   designed to fail silently in regards to contextually insignificant request errors. Make use of _discord.errors.HTTPException_ to catch these,
+   where you can then read the _Retry-After_ value in the header to properly configure your retry functionality.
+
+
+   Final point in regards to this project - the steps of initialising, registering, and syncing is important, and can have severe impacts against the
+   performance and overheard of your bot. Make sure you use methods like setup_hook, on_ready, or on_connect properly.
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
